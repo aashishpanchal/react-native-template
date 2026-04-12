@@ -1,0 +1,24 @@
+{
+  "name": "react-native-template",
+  "version": "0.1.0",
+  "description": "React Native starter template with modern tooling",
+  "license": "MIT",
+  "files": [
+    "template",
+    "template.config.js"
+  ],
+  "author": {
+    "name": "Aashish Panchal",
+    "email": "aipanchal51@gmail.com"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/aashishpanchal/react-native-template"
+  },
+  "keywords": [
+    "react-native",
+    "template",
+    "typescript",
+    "starter"
+  ]
+}

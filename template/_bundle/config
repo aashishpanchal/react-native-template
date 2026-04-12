@@ -1,0 +1,2 @@
+BUNDLE_PATH: "ios/vendor/bundle"
+BUNDLE_FORCE_RUBY_PLATFORM: 1
