@@ -1,0 +1,136 @@
+# yaml-language-server: $schema=https://taskfile.dev/schema.json
+
+version: '3'
+
+vars:
+  PROJECT_NAME:
+    sh: node -p "require('./app.json').name"
+
+tasks:
+  default:
+    desc: Show available commands
+    cmd: task --list-all
+    silent: true
+
+  # Setup
+  setup:all:
+    desc: Complete project setup (deps + pods + assets)
+    cmds:
+      - task: setup:deps
+      - task: ios:pods
+      - task: setup:assets
+
+  setup:deps:
+    desc: Install Node.js dependencies
+    cmd: bun install --frozen
+
+  setup:assets:
+    desc: Link fonts and assets to native projects
+    cmd: bunx react-native-asset
+
+  # Development
+  dev:start:
+    desc: Start Metro bundler server
+    cmd: bun start
+
+  dev:reset-clean:
+    desc: Start Metro bundler with clean cache
+    cmd: bun run start --reset-cache
+
+  # Code Quality
+  lint:check:
+    desc: Run ESLint code linter
+    cmd: bun run lint
+
+  lint:format:
+    desc: Format code with Prettier
+    cmd: bun run format
+
+  lint:types:
+    desc: Run TypeScript type checking
+    cmd: bunx tsc --noEmit
+
+  lint:test:
+    desc: Run Jest tests
+    cmd: bun run test
+
+  # Android
+  android:run:
+    desc: Build and run on Android emulator/device
+    cmd: bun run android
+
+  android:build-apk:
+    desc: Build Android release APK
+    dir: android
+    cmd: ./gradlew assembleRelease
+
+  android:build-aab:
+    desc: Build Android App Bundle (.aab) for Play Store
+    dir: android
+    cmd: ./gradlew bundleRelease
+
+  android:release:
+    desc: Build Android release artifacts (APK + AAB)
+    cmds:
+      - task: android:build-apk
+      - task: android:build-aab
+
+  android:signing-report:
+    desc: Show Android signing SHA-1 fingerprint
+    dir: android
+    cmd: ./gradlew signingReport
+
+  android:generate-keystore:
+    desc: Generate Android release keystore
+    cmd: keytool -genkey -v -keystore android/app/release.keystore -alias {{.PROJECT_NAME}} -keyalg RSA -keysize 2048 -validity 10000
+
+  android:verify-keystore:
+    desc: Verify keystore details and fingerprint
+    interactive: true
+    cmd: 'read -sp "Enter keystore password: " PASS && echo "" && keytool -list -v -keystore android/app/release.keystore -storepass $PASS -alias {{.PROJECT_NAME}} | head -20'
+
+  android:clean:
+    desc: Clean Android Gradle build artifacts
+    dir: android
+    cmd: ./gradlew clean
+
+  # iOS
+  ios:run:
+    desc: Build and run on iOS simulator/device
+    cmd: bun run ios
+
+  ios:pod:
+    desc: Install Ruby gems + iOS CocoaPods dependencies
+    cmds:
+      - bundle install
+      - cd ios && bundle exec pod install
+
+  # Diagnostics
+  diag:clean:
+    desc: Clean build artifacts and caches
+    cmd: bunx @react-native-community/cli clean
+
+  diag:info:
+    desc: Show React Native environment info
+    cmd: bunx @react-native-community/cli info
+
+  diag:doctor:
+    desc: Run React Native environment diagnostics
+    cmd: bunx @react-native-community/cli doctor
+
+  diag:status:
+    desc: Show project and environment status
+    cmds:
+      - echo "Project {{.PROJECT_NAME}}"
+      - echo "Node $(node --version)"
+      - echo "Bun $(bun --version)"
+      - echo "Git branch $(git branch --show-current 2>/dev/null || echo N/A)"
+    silent: true
+
+  diag:devices:
+    desc: List available iOS simulators and Android devices
+    cmds:
+      - echo "iOS Simulators:"
+      - xcrun simctl list devices | grep -E "(Booted|Shutdown)"
+      - echo "Android Devices:"
+      - adb devices
