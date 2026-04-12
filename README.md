@@ -2,6 +2,12 @@
 
 A custom React Native CLI template with modern tooling and clean architecture.
 
+## Preview
+
+<p align="center">
+  <img src="./react-native.gif" alt="Template Preview" width="300" />
+</p>
+
 ## Usage
 
 ```sh
