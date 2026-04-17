@@ -1,6 +1,8 @@
 module.exports = {
   presets: ['module:@react-native/babel-preset'],
   plugins: [
+    // React Compiler
+    ['babel-plugin-react-compiler'],
     // Module-alise
     [
       'module-resolver',
