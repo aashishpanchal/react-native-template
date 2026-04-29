@@ -3,13 +3,40 @@
 version: '3'
 
 vars:
-  PROJECT_NAME: ProjectName # please add project name
+  PROJECT_NAME:
+    sh: bun -p "require('./app.json').name"
 
 tasks:
   default:
     desc: Show available commands
-    cmd: task --list-all
+    cmd: task --list-all --sort none
     silent: true
+
+  # Development
+  dev:start:
+    desc: Start Metro bundler server
+    cmd: bun start
+
+  dev:clean:
+    desc: Start Metro bundler with clean cache
+    cmd: bun run start-clean
+
+  # Code quality
+  code:lint:
+    desc: Run ESLint code linter
+    cmd: bun run lint
+
+  code:test:
+    desc: Run Jest tests
+    cmd: bun run test
+
+  code:format:
+    desc: Format code with Prettier
+    cmd: bun run format
+
+  code:check:
+    desc: Run TypeScript type checking
+    cmd: bunx tsc --noEmit
 
   # Setup
   setup:all:
@@ -27,46 +54,15 @@ tasks:
     desc: Link fonts and assets to native projects
     cmd: bunx react-native-asset
 
-  # Development
-  dev:start:
-    desc: Start Metro bundler server
-    cmd: bun start
-
-  dev:reset-clean:
-    desc: Start Metro bundler with clean cache
-    cmd: bun run start --reset-cache
-
-  # Code Quality
-  lint:check:
-    desc: Run ESLint code linter
-    cmd: bun run lint
-
-  lint:format:
-    desc: Format code with Prettier
-    cmd: bun run format
-
-  lint:types:
-    desc: Run TypeScript type checking
-    cmd: bunx tsc --noEmit
-
-  lint:test:
-    desc: Run Jest tests
-    cmd: bun run test
-
   # Android
-  android:run:
+  android:build:
     desc: Build and run on Android emulator/device
     cmd: bun run android
 
-  android:build-apk:
-    desc: Build Android release APK
+  android:clean:
+    desc: Clean Android Gradle build artifacts
     dir: android
-    cmd: ./gradlew assembleRelease
-
-  android:build-aab:
-    desc: Build Android App Bundle (.aab) for Play Store
-    dir: android
-    cmd: ./gradlew bundleRelease
+    cmd: ./gradlew clean
 
   android:release:
     desc: Build Android release artifacts (APK + AAB)
@@ -74,31 +70,36 @@ tasks:
       - task: android:build-apk
       - task: android:build-aab
 
-  android:signing-report:
+  android:build:apk:
+    desc: Build Android release APK
+    dir: android
+    cmd: ./gradlew assembleRelease
+
+  android:build:aab:
+    desc: Build Android App Bundle (.aab) for Play Store
+    dir: android
+    cmd: ./gradlew bundleRelease
+
+  android:signingReport:
     desc: Show Android signing SHA-1 fingerprint
     dir: android
     cmd: ./gradlew signingReport
 
-  android:generate-keystore:
+  android:keystore:generate:
     desc: Generate Android release keystore
     cmd: keytool -genkey -v -keystore android/app/release.keystore -alias {{.PROJECT_NAME}} -keyalg RSA -keysize 2048 -validity 10000
 
-  android:verify-keystore:
+  android:keystore:verify:
     desc: Verify keystore details and fingerprint
     interactive: true
     cmd: 'read -sp "Enter keystore password: " PASS && echo "" && keytool -list -v -keystore android/app/release.keystore -storepass $PASS -alias {{.PROJECT_NAME}} | head -20'
 
-  android:clean:
-    desc: Clean Android Gradle build artifacts
-    dir: android
-    cmd: ./gradlew clean
-
   # iOS
-  ios:run:
+  ios:build:
     desc: Build and run on iOS simulator/device
     cmd: bun run ios
 
-  ios:pod:
+  ios:pod:install:
     desc: Install Ruby gems + iOS CocoaPods dependencies
     cmds:
       - bundle install
