@@ -1,0 +1,22 @@
+# OSX
+#
+.DS_Store
+
+# Android/IntelliJ
+#
+build/
+.idea
+.gradle
+local.properties
+*.iml
+*.hprof
+.cxx/
+
+# Bundle artifacts
+*.jsbundle
+
+# Remember to never publicly share your keystore.
+# See https://reactnative.dev/docs/signed-apk-android
+key.properties
+**/*.keystore
+**/*.jks
